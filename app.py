@@ -1,31 +1,35 @@
+import streamlit as st
 import pandas as pd
 import joblib
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
 
-# Load dataset
-df = pd.read_csv("Diwali_Sales_Data_100k.csv", encoding='latin1')
+# Load model and columns
+model = joblib.load("model.pkl")
+columns = joblib.load("columns.pkl")
 
-# Drop unnecessary columns
-cols_to_drop = ['Status', 'unnamed1', 'User_ID', 'Product_ID']
-df = df.drop(columns=[col for col in cols_to_drop if col in df.columns])
+st.title("🎇 Diwali Sales Prediction App")
 
-# Remove null values
-df.dropna(inplace=True)
+st.write("Enter customer details to predict purchase amount")
 
-# Convert categorical to numeric
-df_encoded = pd.get_dummies(df, drop_first=True)
+# User Inputs
+age = st.number_input("Age", 18, 70, 30)
+marital_status = st.selectbox("Marital Status", [0, 1])
 
-# Features & Target
-X = df_encoded.drop('Amount', axis=1)
-y = df_encoded['Amount']
+if st.button("Predict Sales Amount"):
 
-# Train model
-model = LinearRegression()
-model.fit(X, y)
+    input_dict = {
+        "Age": age,
+        "Marital_Status": marital_status
+    }
 
-# Save model and columns
-joblib.dump(model, "model.pkl")
-joblib.dump(X.columns, "columns.pkl")
+    input_df = pd.DataFrame([input_dict])
 
-print("Model saved successfully!")
+    # Add missing columns
+    for col in columns:
+        if col not in input_df.columns:
+            input_df[col] = 0
+
+    input_df = input_df[columns]
+
+    prediction = model.predict(input_df)
+
+    st.success(f"Predicted Purchase Amount: ₹ {prediction[0]:,.2f}")
