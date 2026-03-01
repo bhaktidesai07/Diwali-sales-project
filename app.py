@@ -1,14 +1,22 @@
 import streamlit as st
 import pandas as pd
 import joblib
-
-# Load model and columns
-model = joblib.load("model.pkl")
-columns = joblib.load("columns.pkl")
+import os
 
 st.title("🎇 Diwali Sales Prediction App")
 
-st.write("Enter customer details to predict purchase amount")
+# Check files exist
+if not os.path.exists("model.pkl"):
+    st.error("model.pkl file not found. Please upload it to GitHub repository.")
+    st.stop()
+
+if not os.path.exists("columns.pkl"):
+    st.error("columns.pkl file not found. Please upload it to GitHub repository.")
+    st.stop()
+
+# Load model
+model = joblib.load("model.pkl")
+columns = joblib.load("columns.pkl")
 
 # User Inputs
 age = st.number_input("Age", 18, 70, 30)
